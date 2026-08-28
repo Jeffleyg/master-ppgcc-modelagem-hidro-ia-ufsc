@@ -73,7 +73,7 @@ df_etapas = load_data()
 # --- HEADER DA APLICAÇÃO ---
 st.title("🎓 Painel de Acompanhamento da Pesquisa de Mestrado")
 st.markdown("""
-**Programa:** PPGCC / INE / CTC / UFSC | **Bolsa:** Edital FAPESC N.º 043/2026  
+**Programa:** PPGCC / INE / CTC / UFSC
 **Projeto:** *Modelagem Preditiva e Aprendizado Profundo para Séries Temporais Hidrológicas: Previsão de Vazão e Suporte à Gestão de Recursos Hídricos em Santa Catarina*
 """)
 
