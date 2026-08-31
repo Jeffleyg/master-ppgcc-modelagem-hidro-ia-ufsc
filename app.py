@@ -96,12 +96,14 @@ def init_db():
             updated_at TEXT
         )
     """)
+    conn.commit()
     
     c.execute("PRAGMA table_info(etapas)")
     columns = [row[1] for row in c.fetchall()]
     if "updated_at" not in columns:
         c.execute("ALTER TABLE etapas ADD COLUMN updated_at TEXT")
         c.execute("UPDATE etapas SET updated_at = datetime('now') WHERE updated_at IS NULL")
+        conn.commit()
     
     # 2. Tabela de Micro-Checklist Operacional
     c.execute("""
@@ -113,6 +115,7 @@ def init_db():
             FOREIGN KEY (etapa_id) REFERENCES etapas(id)
         )
     """)
+    conn.commit()
     
     # 3. Tabela de Model Registry
     c.execute("""
@@ -134,6 +137,7 @@ def init_db():
             notes TEXT
         )
     """)
+    conn.commit()
     
     # 4. Tabela de Telemetria do Data Lakehouse
     c.execute("""
@@ -150,6 +154,7 @@ def init_db():
             status TEXT
         )
     """)
+    conn.commit()
     
     # 5. Tabela: Revisão Sistemática & Fichamento de Literatura (RSL)
     c.execute("""
@@ -176,6 +181,7 @@ def init_db():
             ai_synthesis TEXT
         )
     """)
+    conn.commit()
     
     c.execute("PRAGMA table_info(literature_reviews)")
     lit_cols = [row[1] for row in c.fetchall()]
@@ -183,7 +189,6 @@ def init_db():
         c.execute("ALTER TABLE literature_reviews ADD COLUMN pdf_url TEXT")
     if "ai_synthesis" not in lit_cols:
         c.execute("ALTER TABLE literature_reviews ADD COLUMN ai_synthesis TEXT")
-        
     conn.commit()
 
     # Seed Tabela: etapas
@@ -270,7 +275,7 @@ def init_db():
             (
                 "2026-08-20 10:00:00",
                 "Temporal Fusion Transformers for Interpretable Multi-horizon Time Series Forecasting",
-                "Lim, B., Arık, S. Ö., Loeff, N., & Pfister, T.",
+                "Lim, B., Arik, S. O., Loeff, N., & Pfister, T.",
                 2021,
                 "International Journal of Forecasting",
                 "Qualis A1",
@@ -365,7 +370,7 @@ def init_db():
             (
                 "2026-08-25 10:45:00",
                 "Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting",
-                "Wu, H., Xu, J.,王, J., & Long, M.",
+                "Wu, H., Xu, J., Wang, J., & Long, M.",
                 2021,
                 "NeurIPS (Advances in Neural Information Processing Systems)",
                 "Qualis A1",
@@ -608,7 +613,7 @@ with st.sidebar:
     st.caption("PPGCC / UFSC - Time-Series ML & Data Lakehouse Hub")
     
     st.markdown("---")
-    st.link_button("📂 Abrir Pasta da Literatura (Drive)", DRIVE_REPO_URL, width="stretch")
+    st.link_button("📂 Abrir Pasta da Literatura (Drive)", DRIVE_REPO_URL, use_container_width=True)
     st.markdown("---")
 
     navigation = st.radio(
@@ -702,9 +707,9 @@ if navigation == "🏛️ Visão Executiva & Cronograma":
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)"
         )
-        st.plotly_chart(fig_gantt, width="stretch")
+        st.plotly_chart(fig_gantt, use_container_width=True)
     
-    st.markdown("### 📝 Gerenciamento Atómico por Macro-Etapa")
+    st.markdown("### 📝 Gerenciamento Atômico por Macro-Etapa")
     if not df_etapas.empty:
         tabs = st.tabs([f"Etapa {row['etapa_num']}: {row['nome'].split(':')[1][:25]}..." for _, row in df_etapas.iterrows()])
         
@@ -726,7 +731,7 @@ if navigation == "🏛️ Visão Executiva & Cronograma":
                         novo_progresso = st.slider("Percentual Manual de Progresso (%):", 0, 100, int(row["progresso"]), step=5)
                         novas_notas = st.text_area("Diário de Bordo & Notas Técnicas do Lab:", value=row["notas"] if row["notas"] else "", height=90)
                         
-                        if st.form_submit_button("💾 Atualizar Metadados da Etapa", width="stretch"):
+                        if st.form_submit_button("💾 Atualizar Metadados da Etapa", use_container_width=True):
                             update_etapa_record(row["id"], novo_progresso, novo_status, novas_notas)
                             st.success("Metadados sincronizados na base SQLite.")
                             st.rerun()
@@ -760,7 +765,7 @@ elif navigation == "📚 Revisão Sistemática (RSL & Acervo)":
     with c_btn1:
         st.info("💡 Clique nos botões de **📥 Download PDF Oficial** para baixar ou ler diretamente o paper original completo em acesso aberto.")
     with c_btn2:
-        st.link_button("📂 Abrir Pasta Completa no Google Drive", DRIVE_REPO_URL, width="stretch")
+        st.link_button("📂 Abrir Pasta Completa no Google Drive", DRIVE_REPO_URL, use_container_width=True)
     
     df_lit = get_literature_df()
     
@@ -798,7 +803,7 @@ elif navigation == "📚 Revisão Sistemática (RSL & Acervo)":
                 "nse_reportado": "{:.3f}",
                 "kge_reportado": "{:.3f}"
             }),
-            width="stretch"
+            use_container_width=True
         )
         
         st.markdown("### 📖 Fichamentos Estruturados & Assistente IA")
@@ -824,9 +829,9 @@ elif navigation == "📚 Revisão Sistemática (RSL & Acervo)":
                     
                     col_b1, col_b2 = st.columns(2)
                     if paper["pdf_url"]:
-                        col_b1.link_button("📥 Baixar PDF Oficial", paper["pdf_url"], width="stretch")
+                        col_b1.link_button("📥 Baixar PDF Oficial", paper["pdf_url"], use_container_width=True)
                     if paper["drive_link"]:
-                        col_b2.link_button("📁 Ver no Drive", paper["drive_link"], width="stretch")
+                        col_b2.link_button("📁 Ver no Drive", paper["drive_link"], use_container_width=True)
                 
                 st.markdown("---")
                 st.markdown("#### 🤖 Síntese Executiva Gerada por IA")
@@ -863,7 +868,7 @@ elif navigation == "📚 Revisão Sistemática (RSL & Acervo)":
         conexao_val = st.text_area("3. Como este artigo embasa a minha Dissertação PPGCC/UFSC:", height=65)
         ai_synth_val = st.text_area("4. Síntese Executiva de IA (Pontos-chave para citação na tese):", height=65)
         
-        if st.form_submit_button("📥 Salvar Fichamento na Base de Literatura", width="stretch"):
+        if st.form_submit_button("📥 Salvar Fichamento na Base de Literatura", use_container_width=True):
             if tit and aut:
                 log_new_paper(tit, aut, ano_val, veic, qualis_val, bib_key, pdf_link_in, drive_url, dataset_val, lookback_val, arch_val, nse_val, kge_val, rmse_val, prob_val, lacuna_val, conexao_val, ai_synth_val)
                 st.success("Artigo fichado e catalogado com sucesso!")
@@ -900,7 +905,7 @@ elif navigation == "🔎 Busca Online & Sugestão Inteligente":
         )
         custom_query = col_q.text_input("Ou digite termos específicos de busca:", value=query_preset)
         
-        if st.button("🚀 Buscar Artigos Online no ArXiv", width="stretch"):
+        if st.button("🚀 Buscar Artigos Online no ArXiv", use_container_width=True):
             with st.spinner("Consultando API do ArXiv..."):
                 results = search_arxiv_papers(custom_query, max_results=6)
                 st.session_state["arxiv_results"] = results
@@ -913,10 +918,10 @@ elif navigation == "🔎 Busca Online & Sugestão Inteligente":
                     st.markdown(f"**Resumo do Paper (Abstract):**\n{res['summary']}")
                     
                     c1, c2 = st.columns(2)
-                    c1.link_button("📥 Download PDF do ArXiv", res["pdf_url"], width="stretch")
+                    c1.link_button("📥 Download PDF do ArXiv", res["pdf_url"], use_container_width=True)
                     
                     with c2:
-                        if st.button(f"📥 Importar para Acervo do Mestrado", key=f"import_{idx}", width="stretch"):
+                        if st.button(f"📥 Importar para Acervo do Mestrado", key=f"import_{idx}", use_container_width=True):
                             log_new_paper(
                                 titulo=res["title"],
                                 autores=res["authors"],
@@ -926,7 +931,7 @@ elif navigation == "🔎 Busca Online & Sugestão Inteligente":
                                 bibtex=f"arxiv{res['year']}_{idx}",
                                 pdf_url=res["pdf_url"],
                                 drive_url=DRIVE_REPO_URL,
-                                dataset_val="Global Time-Series Dataset",
+                                dataset="Global Time-Series Dataset",
                                 lookback="90 passos",
                                 arch="Deep Learning / Transformers",
                                 nse=0.900,
@@ -992,7 +997,7 @@ elif navigation == "🔎 Busca Online & Sugestão Inteligente":
                 st.markdown(f"**💡 Por que ler para o Mestrado:** {item['why']}")
             with c2:
                 st.metric("Score de Relevância", item["relevance_score"])
-                st.link_button("📥 Ler PDF Oficial", item["url"], width="stretch")
+                st.link_button("📥 Ler PDF Oficial", item["url"], use_container_width=True)
             st.divider()
 
 # ==========================================
@@ -1049,7 +1054,7 @@ elif navigation == "🛠️ Engenharia de Dados (Lakehouse)":
                 "drift_score": "{:.4f}",
                 "latency_sec": "{:.2f} s"
             }),
-            width="stretch"
+            use_container_width=True
         )
     
     with st.expander("➕ Disparar / Simular Ingestão Manual de Pipeline (ETL Trigger)"):
@@ -1099,7 +1104,7 @@ elif navigation == "🧠 ML Registry & Benchmarking":
                 "crps": "{:.2f}"
             }).background_gradient(subset=["nse", "kge"], cmap="Greens")
               .background_gradient(subset=["rmse", "mae", "crps"], cmap="Reds_r"),
-            width="stretch"
+            use_container_width=True
         )
     
     st.markdown("---")
@@ -1161,7 +1166,7 @@ elif navigation == "📊 Analytics & Métricas Hidrológicas":
             )
             fig_scatter.update_traces(textposition="top center")
             fig_scatter.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig_scatter, width="stretch")
+            st.plotly_chart(fig_scatter, use_container_width=True)
             
         with c2:
             st.markdown("#### 📉 Comparativo de Erro Absoluto (RMSE vs MAE)")
@@ -1175,7 +1180,7 @@ elif navigation == "📊 Analytics & Métricas Hidrológicas":
                 color_discrete_sequence=["#ef4444", "#f59e0b"]
             )
             fig_bar.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", xaxis_tickangle=-25)
-            st.plotly_chart(fig_bar, width="stretch")
+            st.plotly_chart(fig_bar, use_container_width=True)
             
     st.markdown("---")
     st.markdown("### 🌊 Simulação de Hidrograma Preditivo com Banda de Incerteza (P10 - P50 - P90)")
@@ -1233,7 +1238,7 @@ elif navigation == "📊 Analytics & Métricas Hidrológicas":
         hovermode="x unified",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
-    st.plotly_chart(fig_hydro, width="stretch")
+    st.plotly_chart(fig_hydro, use_container_width=True)
 
 # ==========================================
 # 11. MODULE 7: CENTRO DE OPERAÇÕES & DB
@@ -1277,7 +1282,7 @@ elif navigation == "⚙️ Centro de Operações & DB":
             try:
                 conn = get_db_connection()
                 query_result = pd.read_sql(custom_query, conn)
-                st.dataframe(query_result, width="stretch")
+                st.dataframe(query_result, use_container_width=True)
             except Exception as e:
                 st.error(f"Erro na execução da Query: {str(e)}")
 
